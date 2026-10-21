@@ -892,6 +892,28 @@ void ProfileViewModel::OutputAlignment(int value) {
 	RaisePropertyChanged(L"OutputAlignment");
 }
 
+int ProfileViewModel::GameGpuPreference() const noexcept {
+	return (int)_data->gameGpuPreference;
+}
+
+void ProfileViewModel::GameGpuPreference(int value) {
+	if (value < 0 || value >= (int)::Magpie::GameGpuPreference::COUNT) {
+		return;
+	}
+
+	::Magpie::GameGpuPreference preference = (::Magpie::GameGpuPreference)value;
+	if (_data->gameGpuPreference == preference) {
+		return;
+	}
+
+	_data->gameGpuPreference = preference;
+	// 立即写入，这样即使游戏不是通过 Magpie 启动的，下次启动也会使用该 GPU
+	_data->ApplyGameGpuPreference();
+	AppSettings::Get().SaveAsync();
+
+	RaisePropertyChanged(L"GameGpuPreference");
+}
+
 bool ProfileViewModel::IsDirectFlipDisabled() const noexcept {
 	return _data->IsDirectFlipDisabled();
 }

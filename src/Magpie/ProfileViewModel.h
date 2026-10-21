@@ -166,6 +166,9 @@ struct ProfileViewModel : ProfileViewModelT<ProfileViewModel>,
 	int OutputAlignment() const noexcept;
 	void OutputAlignment(int value);
 
+	int GameGpuPreference() const noexcept;
+	void GameGpuPreference(int value);
+
 	bool IsDirectFlipDisabled() const noexcept;
 	void IsDirectFlipDisabled(bool value);
 
