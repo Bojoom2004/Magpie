@@ -1051,4 +1051,22 @@
   <data name="Home_Advanced_DeveloperOptions_DisableTopmost.Content" xml:space="preserve">
     <value>Отключить функцию «Всегда поверх всех окон»</value>
   </data>
+  <data name="Profile_Advanced_GameGpu.Header" xml:space="preserve">
+    <value>Видеокарта для игры (Windows)</value>
+  </data>
+  <data name="Profile_Advanced_GameGpu.Description" xml:space="preserve">
+    <value>Задаёт предпочтение графики Windows для exe этой игры. Вступает в силу при следующем запуске игры. «По умолчанию» не меняет настройки Windows.</value>
+  </data>
+  <data name="Profile_Advanced_GameGpu_Default.Content" xml:space="preserve">
+    <value>По умолчанию (не менять)</value>
+  </data>
+  <data name="Profile_Advanced_GameGpu_PowerSaving.Content" xml:space="preserve">
+    <value>Энергосбережение (обычно встроенная)</value>
+  </data>
+  <data name="Profile_Advanced_GameGpu_HighPerformance.Content" xml:space="preserve">
+    <value>Высокая производительность (обычно дискретная)</value>
+  </data>
+  <data name="NotifyIcon_LaunchGame" xml:space="preserve">
+    <value>Запустить игру</value>
+  </data>
 </root>

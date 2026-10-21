@@ -1135,4 +1135,22 @@
   <data name="Root_ProfileFlyout_DeleteConfirmationText" xml:space="preserve">
     <value>Are you sure you want to delete "{}"?</value>
   </data>
+  <data name="Profile_Advanced_GameGpu.Header" xml:space="preserve">
+    <value>Game GPU (Windows)</value>
+  </data>
+  <data name="Profile_Advanced_GameGpu.Description" xml:space="preserve">
+    <value>Sets Windows' per-app graphics preference for this game's executable. Takes effect the next time the game starts. &quot;Default&quot; leaves your Windows settings untouched.</value>
+  </data>
+  <data name="Profile_Advanced_GameGpu_Default.Content" xml:space="preserve">
+    <value>Default (don't change)</value>
+  </data>
+  <data name="Profile_Advanced_GameGpu_PowerSaving.Content" xml:space="preserve">
+    <value>Power saving (usually integrated GPU)</value>
+  </data>
+  <data name="Profile_Advanced_GameGpu_HighPerformance.Content" xml:space="preserve">
+    <value>High performance (usually discrete GPU)</value>
+  </data>
+  <data name="NotifyIcon_LaunchGame" xml:space="preserve">
+    <value>Launch game</value>
+  </data>
 </root>

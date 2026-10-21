@@ -646,6 +646,19 @@
 						</TextBox.ContextFlyout>
 					</TextBox>
 				</local:SettingsCard>
+				<local:SettingsCard x:Uid="Profile_Advanced_GameGpu"
+				                    x:Load="{x:Bind ViewModel.IsNotDefaultProfile, Mode=OneTime}"
+				                    IsWrapEnabled="True">
+					<local:SettingsCard.HeaderIcon>
+						<FontIcon Glyph="&#xE7F4;" />
+					</local:SettingsCard.HeaderIcon>
+					<ComboBox DropDownOpened="ComboBox_DropDownOpened"
+					          SelectedIndex="{x:Bind ViewModel.GameGpuPreference, Mode=TwoWay}">
+						<ComboBoxItem x:Uid="Profile_Advanced_GameGpu_Default" />
+						<ComboBoxItem x:Uid="Profile_Advanced_GameGpu_PowerSaving" />
+						<ComboBoxItem x:Uid="Profile_Advanced_GameGpu_HighPerformance" />
+					</ComboBox>
+				</local:SettingsCard>
 				<local:SettingsCard x:Uid="Profile_Advanced_OutputAlignment">
 					<local:SettingsCard.HeaderIcon>
 						<FontIcon Glyph="&#xE799;" />

@@ -892,6 +892,28 @@ void ProfileViewModel::OutputAlignment(int value) {
 	RaisePropertyChanged(L"OutputAlignment");
 }
 
+int ProfileViewModel::GameGpuPreference() const noexcept {
+	return (int)_data->gameGpuPreference;
+}
+
+void ProfileViewModel::GameGpuPreference(int value) {
+	if (value < 0 || value >= (int)::Magpie::GameGpuPreference::COUNT) {
+		return;
+	}
+
+	::Magpie::GameGpuPreference preference = (::Magpie::GameGpuPreference)value;
+	if (_data->gameGpuPreference == preference) {
+		return;
+	}
+
+	_data->gameGpuPreference = preference;
+	// 立即写入，这样即使游戏不是通过 Magpie 启动的，下次启动也会使用该 GPU
+	_data->ApplyGameGpuPreference();
+	AppSettings::Get().SaveAsync();
+
+	RaisePropertyChanged(L"GameGpuPreference");
+}
+
 bool ProfileViewModel::IsDirectFlipDisabled() const noexcept {
 	return _data->IsDirectFlipDisabled();
 }
@@ -917,7 +939,7 @@ fire_and_forget ProfileViewModel::_LoadIcon() {
 	constexpr double ICON_SIZE = 32.0;
 
 	if (_canLaunch) {
-		const bool isDarkTheme = App::Get().IsDarkTheme();
+		const bool preferLightTheme = App::Get().IsLightTheme();
 		const bool isPackaged = _data->isPackaged;
 		const std::wstring path = _data->pathRule;
 		const uint32_t iconSize =
@@ -930,7 +952,8 @@ fire_and_forget ProfileViewModel::_LoadIcon() {
 			[[maybe_unused]] bool result = appxReader.Initialize(path);
 			assert(result);
 
-			std::variant<std::wstring, SoftwareBitmap> uwpIcon = appxReader.GetIcon(iconSize, isDarkTheme);
+			std::variant<std::wstring, SoftwareBitmap> uwpIcon =
+				appxReader.GetIcon(iconSize, preferLightTheme);
 			if (uwpIcon.index() == 0) {
 				iconPath = std::get<0>(uwpIcon);
 			} else {
