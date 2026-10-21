@@ -1,0 +1,30 @@
+name: build-540x
+permissions:
+  contents: read
+
+on:
+  push:
+    branches: ['540x']
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-2025-vs2026
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.14'
+
+      - name: Setup Conan
+        run: pip install conan
+
+      - name: Build
+        run: python scripts/publish.py --compiler=MSVC --platform=x64
+
+      - name: Store build
+        uses: actions/upload-artifact@v7
+        with:
+          name: Magpie-540X-x64
+          path: ./publish/x64
