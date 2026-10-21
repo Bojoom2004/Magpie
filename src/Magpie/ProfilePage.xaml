@@ -646,7 +646,8 @@
 						</TextBox.ContextFlyout>
 					</TextBox>
 				</local:SettingsCard>
-				<local:SettingsCard x:Uid="Profile_Advanced_GameGpu"
+				<local:SettingsCard x:Name="GameGpuSettingsCard"
+				                    x:Uid="Profile_Advanced_GameGpu"
 				                    x:Load="{x:Bind ViewModel.IsNotDefaultProfile, Mode=OneTime}"
 				                    IsWrapEnabled="True">
 					<local:SettingsCard.HeaderIcon>
