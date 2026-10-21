@@ -33,6 +33,14 @@ enum class AutoScale {
 	COUNT
 };
 
+// Windows “图形设置”中应用的 GPU 偏好，对应注册表 UserGpuPreferences
+enum class GameGpuPreference {
+	Default,			// 不修改 Windows 设置
+	PowerSaving,		// 节能 GPU（通常是核显）
+	HighPerformance,	// 高性能 GPU（通常是独显）
+	COUNT
+};
+
 struct Profile {
 	void Copy(const Profile& other) noexcept {
 		scalingMode = other.scalingMode;
@@ -55,6 +63,7 @@ struct Profile {
 		launchParameters = other.launchParameters;
 		outputAlignment = other.outputAlignment;
 		scalingFlags = other.scalingFlags;
+		gameGpuPreference = other.gameGpuPreference;
 		
 		isCroppingEnabled = other.isCroppingEnabled;
 		isFrameRateLimiterEnabled = other.isFrameRateLimiterEnabled;
@@ -74,6 +83,9 @@ struct Profile {
 	bool CanLaunch() const noexcept;
 
 	void Launch() const noexcept;
+
+	// 将 gameGpuPreference 写入 Windows 的每应用 GPU 偏好。对打包应用和“默认”无效
+	void ApplyGameGpuPreference() const noexcept;
 
 	winrt::fire_and_forget OpenProgramLocation() const noexcept;
 
@@ -119,6 +131,8 @@ struct Profile {
 	OutputAlignment outputAlignment = OutputAlignment::Center;
 
 	ScalingFlags scalingFlags = ScalingFlags::AdjustCursorSpeed;
+
+	GameGpuPreference gameGpuPreference = GameGpuPreference::Default;
 
 	bool isPackaged = false;
 	bool isCroppingEnabled = false;

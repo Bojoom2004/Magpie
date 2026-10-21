@@ -112,6 +112,28 @@ bool Profile::CanLaunch() const noexcept {
 	}
 }
 
+void Profile::ApplyGameGpuPreference() const noexcept {
+	if (isPackaged || gameGpuPreference == GameGpuPreference::Default || pathRule.empty()) {
+		return;
+	}
+
+	// Windows 10 1809+ 的“图形设置”将偏好保存在此处，值名称为程序完整路径。
+	// 对于已经在运行的程序，下次启动时生效
+	const wchar_t* value = gameGpuPreference == GameGpuPreference::PowerSaving ?
+		L"GpuPreference=1;" : L"GpuPreference=2;";
+	const LSTATUS status = RegSetKeyValueW(
+		HKEY_CURRENT_USER,
+		L"Software\\Microsoft\\DirectX\\UserGpuPreferences",
+		pathRule.c_str(),
+		REG_SZ,
+		value,
+		(DWORD)((wcslen(value) + 1) * sizeof(wchar_t))
+	);
+	if (status != ERROR_SUCCESS) {
+		Logger::Get().Error(fmt::format("RegSetKeyValueW 失败，错误码: {}", status));
+	}
+}
+
 void Profile::Launch() const noexcept {
 	assert(CanLaunch());
 
@@ -141,6 +163,9 @@ void Profile::Launch() const noexcept {
 			return;
 		}
 	} else {
+		// 在启动前写入 GPU 偏好，保证游戏进程创建时已生效
+		ApplyGameGpuPreference();
+
 		const std::wstring& path = !launcherPath.empty() &&
 			Win32Helper::FileExists(launcherPath.c_str()) ? launcherPath.native() : pathRule;
 		Win32Helper::ShellOpen(path.c_str(), launchParameters.c_str());

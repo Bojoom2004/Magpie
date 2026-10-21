@@ -149,6 +149,8 @@ static void WriteProfile(rapidjson::PrettyWriter<rapidjson::StringBuffer>& write
 
 	writer.Key("outputAlignment");
 	writer.Uint((uint32_t)profile.outputAlignment);
+	writer.Key("gameGpuPreference");
+	writer.Uint((uint32_t)profile.gameGpuPreference);
 
 	writer.EndObject();
 }
@@ -1066,12 +1068,13 @@ bool AppSettings::_LoadProfile(
 	}
 
 	JsonHelper::ReadEnum(profileObj, "outputAlignment", profile.outputAlignment);
+	JsonHelper::ReadEnum(profileObj, "gameGpuPreference", profile.gameGpuPreference);
 
 	return true;
 }
 
 void AppSettings::_SetInitialSettings() noexcept {
-	_scalingModes.resize(7);
+	_scalingModes.resize(6);
 
 	// Lanczos
 	{
@@ -1095,41 +1098,36 @@ void AppSettings::_SetInitialSettings() noexcept {
 		rcas.name = L"FSR\\FSR_RCAS";
 		rcas.parameters[L"sharpness"] = 0.87f;
 	}
-	// FSRCNNX
+	// SGSR：专为移动 GPU 设计的单趟轻量放大，适合 Radeon 540X 这类弱显卡
 	{
-		auto& fsrcnnx = _scalingModes[2];
-		fsrcnnx.name = L"FSRCNNX";
-		fsrcnnx.effects.emplace_back().name = L"FSRCNNX\\FSRCNNX";
-	}
-	// CuNNy
-	{
-		auto& acnet = _scalingModes[3];
-		acnet.name = L"CuNNy";
-		acnet.effects.emplace_back().name = L"CuNNy2\\CuNNy-4x12-NVL";
-	}
-	// Anime4K
-	{
-		auto& anime4k = _scalingModes[4];
-		anime4k.name = L"Anime4K";
-		anime4k.effects.emplace_back().name = L"Anime4K\\Anime4K_Upscale_Denoise_L";
-	}
-	// CRT-Geom
-	{
-		auto& crtGeom = _scalingModes[5];
-		crtGeom.name = L"CRT-Geom";
+		auto& sgsr = _scalingModes[2];
+		sgsr.name = L"SGSR";
 
-		auto& crtGeomEffect = crtGeom.effects.emplace_back();
-		crtGeomEffect.name = L"CRT\\CRT_Geom";
-		crtGeomEffect.scalingType = ::Magpie::ScalingType::Fit;
-		crtGeomEffect.parameters[L"curvature"] = 0.0f;
-		crtGeomEffect.parameters[L"cornerSize"] = 0.001f;
-		crtGeomEffect.parameters[L"CRTGamma"] = 1.5f;
-		crtGeomEffect.parameters[L"monitorGamma"] = 2.2f;
-		crtGeomEffect.parameters[L"interlace"] = 0.0f;
+		auto& sgsrEffect = sgsr.effects.emplace_back();
+		sgsrEffect.name = L"SGSR";
+		sgsrEffect.scalingType = ::Magpie::ScalingType::Fit;
+	}
+	// CAS
+	{
+		auto& cas = _scalingModes[3];
+		cas.name = L"CAS";
+
+		auto& casEffect = cas.effects.emplace_back();
+		casEffect.name = L"CAS\\CAS_Scaling";
+		casEffect.scalingType = ::Magpie::ScalingType::Fit;
+	}
+	// NIS
+	{
+		auto& nis = _scalingModes[4];
+		nis.name = L"NIS";
+
+		auto& nisEffect = nis.effects.emplace_back();
+		nisEffect.name = L"NIS\\NIS";
+		nisEffect.scalingType = ::Magpie::ScalingType::Fit;
 	}
 	// Integer Scale 2x
 	{
-		auto& integer2x = _scalingModes[6];
+		auto& integer2x = _scalingModes[5];
 		integer2x.name = L"Integer Scale 2x";
 
 		auto& nearest = integer2x.effects.emplace_back();

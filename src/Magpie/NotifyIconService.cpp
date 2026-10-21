@@ -4,6 +4,8 @@
 #include "LocalizationService.h"
 #include "Logger.h"
 #include "NotifyIconService.h"
+#include "Profile.h"
+#include "ProfileService.h"
 #include "resource.h"
 #include "ScalingService.h"
 #include <CommCtrl.h>
@@ -16,6 +18,9 @@ namespace Magpie {
 // 当任务栏被创建时会广播此消息。用于在资源管理器被重新启动时重新创建托盘图标
 // https://learn.microsoft.com/en-us/windows/win32/shell/taskbar#taskbar-creation-notification
 static UINT WM_TASKBARCREATED = 0;
+
+// 托盘菜单中“启动游戏”子菜单项的 ID 起点，实际 ID 为起点 + 配置文件索引
+static constexpr UINT LAUNCH_MENU_ID_BASE = 1000;
 
 void NotifyIconService::Initialize() noexcept {
 	WM_TASKBARCREATED = RegisterWindowMessage(L"TaskbarCreated");
@@ -130,6 +135,39 @@ LRESULT NotifyIconService::_NotifyIconWndProc(HWND hWnd, UINT message, WPARAM wP
 			);
 			AppendMenu(hMenu.get(), MF_STRING, 3, timerText.c_str());
 
+			// 快速启动：列出所有可启动的配置文件（跳过默认配置和找不到程序的配置）
+			{
+				wil::unique_hmenu hLaunchMenu(CreatePopupMenu());
+				ProfileService& profileService = ProfileService::Get();
+				const uint32_t profileCount = profileService.GetProfileCount();
+				bool hasLaunchItem = false;
+				for (uint32_t i = 0; i < profileCount; ++i) {
+					const Profile& profile = profileService.GetProfile(i);
+					if (profile.name.empty() || !profile.CanLaunch()) {
+						continue;
+					}
+
+					// 菜单文本中的 & 表示快捷键，需要转义
+					std::wstring itemText = profile.name;
+					for (size_t pos = itemText.find(L'&'); pos != std::wstring::npos; pos = itemText.find(L'&', pos + 2)) {
+						itemText.insert(pos, 1, L'&');
+					}
+					AppendMenu(hLaunchMenu.get(), MF_STRING, LAUNCH_MENU_ID_BASE + i, itemText.c_str());
+					hasLaunchItem = true;
+				}
+
+				if (hasLaunchItem) {
+					hstring launchText = ls.GetLocalizedString(L"NotifyIcon_LaunchGame");
+					if (launchText.empty()) {
+						launchText = L"Launch game";
+					}
+
+					// 子菜单的所有权转移给父菜单，hMenu 销毁时会一并销毁
+					AppendMenu(hMenu.get(), MF_STRING | MF_POPUP,
+						(UINT_PTR)hLaunchMenu.release(), launchText.c_str());
+				}
+			}
+
 			hstring exitText = ls.GetLocalizedString(L"NotifyIcon_Exit");
 			AppendMenu(hMenu.get(), MF_STRING, 4, exitText.c_str());
 
@@ -160,6 +198,18 @@ LRESULT NotifyIconService::_NotifyIconWndProc(HWND hWnd, UINT message, WPARAM wP
 				break;
 			case 4:
 				App::Get().Quit();
+				break;
+			default:
+				if (selectedMenuId >= (BOOL)LAUNCH_MENU_ID_BASE) {
+					const uint32_t profileIdx = uint32_t(selectedMenuId) - LAUNCH_MENU_ID_BASE;
+					ProfileService& profileService = ProfileService::Get();
+					if (profileIdx < profileService.GetProfileCount()) {
+						const Profile& profile = profileService.GetProfile(profileIdx);
+						if (profile.CanLaunch()) {
+							profile.Launch();
+						}
+					}
+				}
 				break;
 			}
 			break;
